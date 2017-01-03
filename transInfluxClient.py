@@ -24,21 +24,41 @@ def singleton(class_):
 
 
 @singleton
-class StartInflux(object):
-    def __init__(self, server, dbname):
+class GetInflux(object):
+    def __init__(self, server, port, db, logfile, loglevel, logformat, pattern):
         # args
         self.log = None
-        self.log_level = 'ERROR'
-        self.log_format = '%(asctime)s - %(levelname)s - %(message)s'
-        self.log_file = 'trans_influx_sender.log'
-        self.pattern = '%Y-%m-%dT%H:%M:%SZ'
+        self.log_level = loglevel
+        self.log_format = logformat
+        self.log_file = logfile
+        self.pattern = pattern
         self.server = server
-        self.dbname = dbname
+        self.dbname = db
+        self.port = port
+
+        self.initialize()
 
         self.logger()
         self.influx_connection = None
         self.get_influx_client()
         self.executor = ThreadPoolExecutor(max_workers=50)
+
+    def initialize(self):
+        import ConfigParser
+        try:
+            config = ConfigParser.ConfigParser(allow_no_value=True)
+            config.read('config.cfg')
+            self.server = config.get('influx', 'server')
+            self.dbname = config.get('influx', 'dbname')
+            self.port = config.get('influx', 'port')
+            self.log_level = config.get('influx', 'log_level')
+            self.log_format = config.get('influx', 'log_format')
+            self.log_file = config.get('influx', 'log_file')
+            self.pattern = config.get('influx', 'time_pattern')
+        except Exception as e:
+            print e
+        finally:
+            del config
 
     def logger(self):
         try:
@@ -53,27 +73,29 @@ class StartInflux(object):
 
     def send_influx_points(self, points):
         try:
+            if self.influx_connection is None:
+                self.get_influx_client()
             self.influx_connection.write_points(points)
         except Exception as e:
-            print e
             self.log.error('cannot add data points {0} due to {1}'.format(points, e))
 
     def send(self, trans_name, timestamp, duration):
-        json_body = [
-            {
-                "measurement": 'response',
-                "tags": {
-                    "response time": trans_name
-                },
-                "time": get_time_pattern(timestamp),
-                "fields": {
-                    "value": duration
+        try:
+            json_body = [
+                {
+                    "measurement": 'response',
+                    "tags": {
+                        "response time": trans_name
+                    },
+                    "time": get_time_pattern(timestamp),
+                    "fields": {
+                        "value": duration
+                    }
                 }
-            }
-        ]
-        if self.influx_connection is None:
-            self.get_influx_client()
-        self.executor.submit(self.send_influx_points, json_body)
+            ]
+            self.executor.submit(self.send_influx_points, json_body)
+        except Exception as e:
+            self.log.error('failed to send data points'.format(e))
 
     def close(self):
         self.influx_connection.close()

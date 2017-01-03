@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import random
 import time
 
@@ -7,7 +9,7 @@ import transResponseTime
 from transResponseTime import measure_time
 
 
-@measure_time(immediate=False, influx_set=True)
+@measure_time()
 def a_test_method(sec=0.2):
     time.sleep(sec)
 
@@ -19,13 +21,17 @@ if __name__ == "__main__":
     tr.measure('plain_usage_exam', time.sleep, 0.5)
     tr.get_results()
 
+    # you can also pass argumets to the decorator.
+    # @measure_time(immediate=True, store=True)
+
     #  Decorator Usage Examples
     ls = []
-    n_treads = 50
+    n_treads = 300
     ex = ThreadPoolExecutor(n_treads)
     for i in range(n_treads):
-        time.sleep(2)
-        ls.append(ex.submit(a_test_method, random.randint(3, 10)))
+        time.sleep(0.1)
+        ls.append(ex.submit(a_test_method, 0.3))
+        # ls.append(ex.submit(a_test_method, random.uniform(0.5, 2.5)))
 
     while 'running' in str(ls):
         time.sleep(1)
