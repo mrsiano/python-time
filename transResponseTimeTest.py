@@ -26,12 +26,11 @@ if __name__ == "__main__":
 
     #  Decorator Usage Examples
     ls = []
-    n_treads = 300
+    n_treads = 10
     ex = ThreadPoolExecutor(n_treads)
     for i in range(n_treads):
         time.sleep(0.1)
-        ls.append(ex.submit(a_test_method, 0.3))
-        # ls.append(ex.submit(a_test_method, random.uniform(0.5, 2.5)))
+        ls.append(ex.submit(a_test_method, random.uniform(0.5, 2.5)))
 
     while 'running' in str(ls):
         time.sleep(1)

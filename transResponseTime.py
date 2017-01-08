@@ -39,12 +39,13 @@ class TransResponse(object):
         try:
             config = ConfigParser.ConfigParser(allow_no_value=True)
             config.read('config.cfg')
-            if config.get('run', 'report_to_influx'):
+            if config.getboolean('run', 'report_to_influx'):
+                # TODO:// fix the log format arg.
                 global influx
                 influx = transInfluxClient.GetInflux(config.get('influx', 'server'), config.get('influx', 'port'),
-                                                     config.get('influx', 'dbname'), config.get('influx', 'log_file'),
-                                                     config.get('influx', 'log_file'), config.get('influx', 'log_file'),
-                                                     config.get('influx', 'time_pattern'))
+                                             config.get('influx', 'dbname'), config.get('influx', 'log_file'),
+                                             config.get('influx', 'log_level'),
+                                             pattern=config.get('influx', 'time_pattern'))
         except Exception as e:
             print e
         finally:
@@ -55,7 +56,10 @@ TransResponse()
 
 
 def send_influx(trans, timestamp, duration):
-    influx.send(trans, timestamp, duration)
+    try:
+        influx.send(trans, timestamp, duration)
+    except Exception as e:
+        print e
 
 
 def get_results():
@@ -79,16 +83,13 @@ def measure(method_name, func_to_run=None, *args):
     finally:
         _duration = (time.time() - _start_time)
         finalize(False, True, method_name, _start_time, _duration)
-        # send_influx(method_name, _start_time, _duration)
-        # store_transaction(method_name, _start_time, _duration)
 
 
 def store_transaction(name=None, start_time=None, duration=None):
     trans_map = dict()
     try:
         trans_map[name] = (duration, start_time)
-        with lock:
-            transactions.append(trans_map)
+        transactions.append(trans_map)
     except Exception as e:
         print 'failed to store trans' + str(e)
 
@@ -115,13 +116,14 @@ def measure_time(fn=None, immediate=False, store=True):
 
 
 def finalize(toprint, tostore, name, start_time, duration):
+    global influx
     if influx:
         send_influx(name, start_time, duration)
-    if toprint:
-        with lock:
+    with lock:
+        if toprint:
             print "{0} : {1} ".format(name, results_format % duration)
-    if tostore:
-        store_transaction(name, start_time, duration)
+        if tostore:
+            store_transaction(name, start_time, duration)
 
 
 class FuncTimer(object):
@@ -143,11 +145,4 @@ class FuncTimer(object):
         finally:
             _duration = time.time() - start_time
             finalize(self.print_now, self.store_now, fn.__name__, start_time, _duration)
-            # if self.influx:
-            #     send_influx(fn.__name__, start_time, _duration)
-            # if self.print_now:
-            #     with lock:
-            #         print "{0} : {1} ".format(fn.__name__, results_format % _duration)
-            # if self.store_now:
-            #     store_transaction(fn.__name__, start_time, _duration)
 

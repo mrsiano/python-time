@@ -25,7 +25,8 @@ def singleton(class_):
 
 @singleton
 class GetInflux(object):
-    def __init__(self, server, port, db, logfile, loglevel, logformat, pattern):
+    def __init__(self, server, port, db, logfile, loglevel, logformat ="%(asctime)s - %(levelname)s - %(message)s",
+                 pattern=None):
         # args
         self.log = None
         self.log_level = loglevel
@@ -36,29 +37,14 @@ class GetInflux(object):
         self.dbname = db
         self.port = port
 
-        self.initialize()
-
         self.logger()
         self.influx_connection = None
         self.get_influx_client()
         self.executor = ThreadPoolExecutor(max_workers=50)
+        self.running = True
 
-    def initialize(self):
-        import ConfigParser
-        try:
-            config = ConfigParser.ConfigParser(allow_no_value=True)
-            config.read('config.cfg')
-            self.server = config.get('influx', 'server')
-            self.dbname = config.get('influx', 'dbname')
-            self.port = config.get('influx', 'port')
-            self.log_level = config.get('influx', 'log_level')
-            self.log_format = config.get('influx', 'log_format')
-            self.log_file = config.get('influx', 'log_file')
-            self.pattern = config.get('influx', 'time_pattern')
-        except Exception as e:
-            print e
-        finally:
-            del config
+    def is_running(self):
+        return self.running
 
     def logger(self):
         try:
