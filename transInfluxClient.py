@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
-# The following is an python parser for influxdb client.
-# the following module requires the following python pkgs {influxdb, concurrent.futures}
+"""
+The following is an python parser for influxdb client.
+the following module requires the following python pkgs {influxdb, concurrent.futures}
+"""
+
 
 import logging
 

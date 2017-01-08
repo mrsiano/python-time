@@ -1,5 +1,17 @@
-# python-time
+# Python-time
 WIP wrap and extend profilehooks.. WIP
+
+the following code is a framework was writen for handle, manage, 
+and get transaction response time statistics.
+it also extends profilehooks, and expose some additional capabilities.
+
+some of the advantages is the ability to publish stats to influxDB.
+
+# Requirements
+```
+this programs require the following python dependencies:
+influxdb, concurrent.futures
+```
 
 # Usage And Examples
 the project includes configuration for easy usage, see config.cfg
