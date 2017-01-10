@@ -68,17 +68,19 @@ class GetInflux(object):
         except Exception as e:
             self.log.error('cannot add data points {0} due to {1}'.format(points, e))
 
-    def send(self, trans_name, timestamp, duration):
+    def send(self, trans_name, timestamp, duration, sent=0, recv=0):
         try:
             json_body = [
                 {
-                    "measurement": 'response',
+                    "measurement": 'response4',
                     "tags": {
                         "response time": trans_name
                     },
                     "time": get_time_pattern(timestamp),
                     "fields": {
-                        "value": duration
+                        "value": duration,
+                        "bytes_sent": sent,
+                        "bytes_recv": recv
                     }
                 }
             ]

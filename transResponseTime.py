@@ -10,14 +10,17 @@ some of advantages is the ability to publish stats directly to influxDB.
 """
 
 import time
+import psutil
 import transInfluxClient
 
 from multiprocessing import Lock
 
-transactions = []  # structure is {name: (timestamp, response time)}
+transactions = []  # structure is {name: (timestamp, response time, rec, sent)}
 lock = Lock()
 results_format = "%.4f"
 influx = None
+net_dev = 'en0'
+collect_net = False
 
 
 def singleton(class_):
@@ -39,6 +42,11 @@ class TransResponse(object):
         try:
             config = ConfigParser.ConfigParser(allow_no_value=True)
             config.read('config.cfg')
+            if config.getboolean('run', 'collect_net_io'):
+                global collect_net, net_dev
+                collect_net = True
+                # TODO::// may be replace it with automatic manner.
+                net_dev = config.get('run', 'net_device')
             if config.getboolean('run', 'report_to_influx'):
                 # TODO:// fix the log format arg.
                 global influx
@@ -55,9 +63,9 @@ class TransResponse(object):
 TransResponse()
 
 
-def send_influx(trans, timestamp, duration):
+def send_influx(trans, timestamp, duration, bsent=0, brecv=0):
     try:
-        influx.send(trans, timestamp, duration)
+        influx.send(trans, timestamp, duration, bsent, brecv)
     except Exception as e:
         print e
 
@@ -72,6 +80,9 @@ def measure(method_name, func_to_run=None, *args):
     Context manager to log request response time
     """
     _start_time = 0
+    global net_dev, collect_net
+    if collect_net:
+        net_io_dump = psutil.net_io_counters(True).get(net_dev)
     try:
         _start_time = time.time()
         if len(args) >= 1:
@@ -82,13 +93,17 @@ def measure(method_name, func_to_run=None, *args):
         raise e
     finally:
         _duration = (time.time() - _start_time)
-        finalize(False, True, method_name, _start_time, _duration)
+        if collect_net:
+            net_io_dump2 = psutil.net_io_counters(True).get(net_dev)
+            sent = net_io_dump2[0] - net_io_dump[0]
+            recv = net_io_dump2[1] - net_io_dump[1]
+        finalize(False, True, method_name, _start_time, _duration, sent, recv)
 
 
-def store_transaction(name=None, start_time=None, duration=None):
+def store_transaction(name=None, start_time=None, duration=None, recive=0, sent=0):
     trans_map = dict()
     try:
-        trans_map[name] = (duration, start_time)
+        trans_map[name] = (duration, start_time, sent, recive)
         transactions.append(trans_map)
     except Exception as e:
         print 'failed to store trans' + str(e)
@@ -115,15 +130,15 @@ def measure_time(fn=None, immediate=False, store=True):
     return new_fn
 
 
-def finalize(toprint, tostore, name, start_time, duration):
+def finalize(toprint, tostore, name, start_time, duration, sent=0, recv=0):
     global influx
     if influx:
-        send_influx(name, start_time, duration)
+        send_influx(name, start_time, duration, sent, recv)
     with lock:
         if toprint:
             print "{0} : {1} ".format(name, results_format % duration)
         if tostore:
-            store_transaction(name, start_time, duration)
+            store_transaction(name, start_time, duration, sent, recv)
 
 
 class FuncTimer(object):
@@ -135,14 +150,20 @@ class FuncTimer(object):
 
     def __call__(self, *args, **kw):
         """Profile a singe call to the function."""
+        global net_dev, collect_net
         fn = self.sfn
-        start_time = None
+        if collect_net:
+            net_io_dump = psutil.net_io_counters(True).get(net_dev)
+        start_time = time.time()
         try:
-            start_time = time.time()
             return fn(*args, **kw)
         except Exception as e:
             print 'Ops something went wrong ' + str(e)
         finally:
             _duration = time.time() - start_time
-            finalize(self.print_now, self.store_now, fn.__name__, start_time, _duration)
+            if collect_net:
+                net_io_dump2 = psutil.net_io_counters(True).get(net_dev)
+                sent = net_io_dump2[0] - net_io_dump[0]
+                recv = net_io_dump2[1] - net_io_dump[1]
+            finalize(self.print_now, self.store_now, fn.__name__, start_time, _duration, sent, recv)
 

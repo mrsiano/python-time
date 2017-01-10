@@ -10,7 +10,7 @@ some of the advantages is the ability to publish stats to influxDB.
 # Requirements
 ```
 this programs require the following python dependencies:
-influxdb, concurrent.futures
+influxdb, concurrent.futures, psutils
 ```
 
 # Usage And Examples
