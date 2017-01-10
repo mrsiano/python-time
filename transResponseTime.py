@@ -158,7 +158,8 @@ class FuncTimer(object):
         try:
             return fn(*args, **kw)
         except Exception as e:
-            print 'Ops something went wrong ' + str(e)
+            # TODO:// function failure needs to be handled.
+            pass
         finally:
             _duration = time.time() - start_time
             if collect_net:
