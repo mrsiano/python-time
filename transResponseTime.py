@@ -90,6 +90,7 @@ def measure(method_name, func_to_run=None, *args):
         else:
             func_to_run()
     except Exception as e:
+        # TODO:// function failure needs to be handled.
         raise e
     finally:
         _duration = (time.time() - _start_time)
