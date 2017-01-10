@@ -1,12 +1,17 @@
 # Python-time Intro
 
-WIP wrap and extend profilehooks.. WIP
+A transaction statistics profiler.
 
-the following code is a framework was writen for handle, manage, 
-and get transaction response time statistics.
+the following project is an profiler framework was writen for handle, 
+manage, and get transaction response time statistics.
 it also extends profilehooks, and expose some additional capabilities.
 
-some of the advantages is the ability to publish stats to influxDB.
+some of the advantages is the ability to publish stats to time series db.
+
+### Some of the advantages
+- measure response time.
+- measure network IO correlated to response time.
+- publish the results to time series db (influxDB).
 
 # Quick Start
 
