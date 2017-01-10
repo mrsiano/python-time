@@ -1,4 +1,5 @@
-# Python-time
+# Python-time Intro
+
 WIP wrap and extend profilehooks.. WIP
 
 the following code is a framework was writen for handle, manage, 
@@ -7,13 +8,15 @@ it also extends profilehooks, and expose some additional capabilities.
 
 some of the advantages is the ability to publish stats to influxDB.
 
-# Requirements
+# Quick Start
+
+### Requirements
 ```
 this programs require the following python dependencies:
 influxdb, concurrent.futures, psutils
 ```
 
-# Usage And Examples
+### Usage And Examples
 the project includes configuration for easy usage, see config.cfg
 
 once the configuration set, choose the right method to use in your code.
