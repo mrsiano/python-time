@@ -25,15 +25,14 @@ influxdb, concurrent.futures, psutils
 #### setup
 1. clone the probject to where you want to monitor the python code.
 2. edit the configuration file see config.cfg
-```
-make sure to set the influxdb: server = localhost
-make sure to specify the network device: net_device = en4
-```
-
-3. decorate your code
- ```
- ./decorating_app.sh <the python code you want to monitor>
- ```
+    ```
+    make sure to set the influxdb: server = localhost
+    make sure to specify the network device: net_device = en4
+    ```
+3. decorate your codes
+     ```
+     ./decorating_app.sh <the python code you want to monitor>
+     ```
 
 
 #### more standalone examples.
