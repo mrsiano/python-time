@@ -24,12 +24,19 @@ influxdb, concurrent.futures, psutils
 ### Usage And Examples
 #### setup
 1. clone the probject to where you want to monitor the python code.
+```
+git clone https://github.com/mrsiano/python-time.git
+cd python-time
+```
 2. edit the configuration file see config.cfg
+
     ```
+    vim config.cfg
     make sure to set the influxdb: server = localhost
     make sure to specify the network device: net_device = en4
     ```
 3. decorate your codes
+
      ```
      ./decorating_app.sh <the python code you want to monitor>
      ```
