@@ -8,7 +8,7 @@ it also extends profilehooks, and expose some additional capabilities.
 
 some of the advantages is the ability to publish stats to time series db.
 
-### Some of the advantages
+### Advantages:
 - measure response time.
 - measure network IO correlated to response time.
 - publish the results to time series db (influxDB).
@@ -22,9 +22,21 @@ influxdb, concurrent.futures, psutils
 ```
 
 ### Usage And Examples
-the project includes configuration for easy usage, see config.cfg
+#### setup
+1. clone the probject to where you want to monitor the python code.
+2. edit the configuration file see config.cfg
+```
+make sure to set the influxdb: server = localhost
+make sure to specify the network device: net_device = en4
+```
 
-once the configuration set, choose the right method to use in your code.
+3. decorate your code
+ ```
+ ./decorating_app.sh <the python code you want to monitor>
+ ```
+
+
+#### more standalone examples.
 ```
 1. decorator usage:
     first the module should be imported e.g:
