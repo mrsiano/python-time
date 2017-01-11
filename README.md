@@ -24,10 +24,11 @@ influxdb, concurrent.futures, psutils
 ### Usage And Examples
 #### setup
 1. clone the probject to where you want to monitor the python code.
-```
-git clone https://github.com/mrsiano/python-time.git
-cd python-time
-```
+
+    ```
+    git clone https://github.com/mrsiano/python-time.git
+    cd python-time
+    ```
 2. edit the configuration file see config.cfg
 
     ```
