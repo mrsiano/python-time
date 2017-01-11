@@ -23,17 +23,18 @@ influxdb, concurrent.futures, psutils
 
 ### Usage And Examples
 #### setup
-1. clone the probject to where you want to monitor the python code.
+1. clone the project to where you want to monitor the python code.
 
     ```
     git clone https://github.com/mrsiano/python-time.git
     cd python-time
+    # make sure your influxdb running.
     ```
 2. edit the configuration file see config.cfg
 
     ```
     vim config.cfg
-    make sure to set the influxdb: server = localhost
+    make sure to set the influxdb: server \ port.
     make sure to specify the network device: net_device = en4
     ```
 3. decorate your codes
@@ -64,3 +65,13 @@ influxdb, concurrent.futures, psutils
     ...
     transResponseTime.measure('plain_usage_exam', time.sleep, 0.5)
 ```
+
+### Analysis
+once your test completed and your influxdb collects the results,
+import the grafana template into your grafana server.
+
+1. first add to grafana your influxdb server.
+2. make sure you change the db name in the json template file before importing.
+
+examples:
+![Alt text](screencapture-localhost-3000-dashboard-db-transactions-1484139148961.png?raw=true "Optional Title")
