@@ -8,6 +8,9 @@ it also extends profilehooks, and expose some additional capabilities.
 
 some of the advantages is the ability to publish stats to time series db.
 
+screen shot
+![Alt text](screencapture-localhost-3000-dashboard-db-transactions-1484139148961.png?raw=true "Optional Title")
+
 ### Advantages:
 - measure response time.
 - measure network IO correlated to response time.
@@ -72,6 +75,3 @@ import the grafana template into your grafana server.
 
 1. first add to grafana your influxdb server.
 2. make sure you change the db name in the json template file before importing.
-
-examples:
-![Alt text](screencapture-localhost-3000-dashboard-db-transactions-1484139148961.png?raw=true "Optional Title")
