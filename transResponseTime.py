@@ -8,7 +8,7 @@ it also extends profilehooks, and expose some additional capabilities.
 
 some of advantages is the ability to publish stats directly to influxDB.
 """
-
+import os
 import time
 import psutil
 import transInfluxClient
@@ -41,7 +41,8 @@ class TransResponse(object):
         config = None
         try:
             config = ConfigParser.ConfigParser(allow_no_value=True)
-            config.read('config.cfg')
+            os.path.dirname(__file__)
+            config.read(os.path.dirname(__file__) + '/config.cfg')
             if config.getboolean('run', 'collect_net_io'):
                 global collect_net, net_dev
                 collect_net = True
@@ -80,6 +81,7 @@ def measure(method_name, func_to_run=None, *args):
     Context manager to log request response time
     """
     _start_time = 0
+    net_io_dump = None
     global net_dev, collect_net
     if collect_net:
         net_io_dump = psutil.net_io_counters(True).get(net_dev)
@@ -94,11 +96,7 @@ def measure(method_name, func_to_run=None, *args):
         raise e
     finally:
         _duration = (time.time() - _start_time)
-        if collect_net:
-            net_io_dump2 = psutil.net_io_counters(True).get(net_dev)
-            sent = net_io_dump2[0] - net_io_dump[0]
-            recv = net_io_dump2[1] - net_io_dump[1]
-        finalize(False, True, method_name, _start_time, _duration, sent, recv)
+        finalize(False, True, method_name, _start_time, _duration, net_io_dump)
 
 
 def store_transaction(name=None, start_time=None, duration=None, recive=0, sent=0):
@@ -131,8 +129,14 @@ def measure_time(fn=None, immediate=False, store=True):
     return new_fn
 
 
-def finalize(toprint, tostore, name, start_time, duration, sent=0, recv=0):
-    global influx
+def finalize(toprint, tostore, name, start_time, duration, net_io_dump):
+    sent = 0
+    recv = 0
+    global influx, collect_net
+    if collect_net:
+        net_io_dump2 = psutil.net_io_counters(True).get(net_dev)
+        sent = net_io_dump2[0] - net_io_dump[0]
+        recv = net_io_dump2[1] - net_io_dump[1]
     if influx:
         send_influx(name, start_time, duration, sent, recv)
     with lock:
@@ -153,6 +157,7 @@ class FuncTimer(object):
         """Profile a singe call to the function."""
         global net_dev, collect_net
         fn = self.sfn
+        net_io_dump = None
         if collect_net:
             net_io_dump = psutil.net_io_counters(True).get(net_dev)
         start_time = time.time()
@@ -160,12 +165,7 @@ class FuncTimer(object):
             return fn(*args, **kw)
         except Exception as e:
             # TODO:// function failure needs to be handled.
-            pass
+            print e
         finally:
             _duration = time.time() - start_time
-            if collect_net:
-                net_io_dump2 = psutil.net_io_counters(True).get(net_dev)
-                sent = net_io_dump2[0] - net_io_dump[0]
-                recv = net_io_dump2[1] - net_io_dump[1]
-            finalize(self.print_now, self.store_now, fn.__name__, start_time, _duration, sent, recv)
-
+            finalize(self.print_now, self.store_now, fn.__name__, start_time, _duration, net_io_dump)

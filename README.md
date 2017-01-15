@@ -20,8 +20,14 @@ screen shot
 
 ### Requirements
 ```
+python pkgs:
 this programs require the following python dependencies:
 influxdb, concurrent.futures, psutils
+
+
+setup components:
+- influxdb
+- grafana
 ```
 
 ### Usage And Examples
