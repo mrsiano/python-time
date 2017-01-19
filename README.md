@@ -40,7 +40,10 @@ setup components:
     # make sure your influxdb running.
     ```
 2. export python-time
+<<<<<<< HEAD
 
+=======
+>>>>>>> 78e2716... doc update: README update.
     ```
     export PYTHONPATH=<gitdir>/python-time/
     ```
