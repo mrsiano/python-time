@@ -39,14 +39,18 @@ setup components:
     cd python-time
     # make sure your influxdb running.
     ```
-2. edit the configuration file see config.cfg
+2. export python-time
+    ```
+    export PYTHONPATH=<gitdir>/python-time/
+    ```
+3. edit the configuration file see config.cfg
 
     ```
     vim config.cfg
     make sure to set the influxdb: server \ port.
     make sure to specify the network device: net_device = en4
     ```
-3. decorate your codes
+4. decorate your codes
 
      ```
      ./decorating_app.sh <the python code you want to monitor>
