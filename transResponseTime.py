@@ -52,7 +52,8 @@ class TransResponse(object):
                 # TODO:// fix the log format arg.
                 global influx
                 influx = transInfluxClient.GetInflux(config.get('influx', 'server'), config.get('influx', 'port'),
-                                             config.get('influx', 'dbname'), config.get('influx', 'log_file'),
+                                             config.get('influx', 'dbname'), config.get('influx', 'table'),
+                                             config.get('influx', 'log_file'),
                                              config.get('influx', 'log_level'),
                                              pattern=config.get('influx', 'time_pattern'))
         except Exception as e:

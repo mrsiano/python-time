@@ -28,7 +28,7 @@ def singleton(class_):
 
 @singleton
 class GetInflux(object):
-    def __init__(self, server, port, db, logfile, loglevel, logformat ="%(asctime)s - %(levelname)s - %(message)s",
+    def __init__(self, server, port, db, table_name, logfile, loglevel, logformat ="%(asctime)s - %(levelname)s - %(message)s",
                  pattern=None):
         # args
         self.log = None
@@ -37,7 +37,8 @@ class GetInflux(object):
         self.log_file = logfile
         self.pattern = pattern
         self.server = server
-        self.dbname = db
+        self.db_name = db
+        self.table_name = table_name
         self.port = port
 
         self.logger()
@@ -58,7 +59,7 @@ class GetInflux(object):
             self.log.error('failed to start log {0} - {1}'.format(self.log_file, e))
 
     def get_influx_client(self):
-        self.influx_connection = client.InfluxDBClient(host=self.server, database=self.dbname)
+        self.influx_connection = client.InfluxDBClient(host=self.server, database=self.db_name)
 
     def send_influx_points(self, points):
         try:
