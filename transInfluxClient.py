@@ -73,7 +73,7 @@ class GetInflux(object):
         try:
             json_body = [
                 {
-                    "measurement": 'response4',
+                    "measurement": self.table_name,
                     "tags": {
                         "response time": trans_name
                     },
